@@ -16,15 +16,24 @@ def process_image_question(problem_id, problem_data, image_path):
 
     # 构建多模态提示
     prompt = f"""
-    请根据图片内容和以下问题进行分析,你必须严格遵守我的[要求]。如果没有遵守[要求]，将会面临惩罚：
-    [问题]：{problem_data['question']}
-    [选项]：{" | ".join(problem_data['choices'])}
-    [要求]：给出选项编号（如0、1、2）。无论如何，请只给出选项答案，不要任何额外解释。你必须遵守我的要求，否则将会遭到惩罚。
+    [Task Description]
+Here is a question-answer task. Please
+carefully read the following context,
+question and image. Your task is to give the correct
+answer. You should follow the [Guidance].
+    [questions]：{problem_data['question']}
+    [choices]：{" | ".join(problem_data['choices'])}
+    [Guidance]：You should strictly follow my guidance:
+1. The question must only have an answer.That is the index of the choices, for example, 0.
+2. You should strictly follow the given
+output format and can’t output other
+information.
+    [output]:index
     """
 
-    # 调用llava模型
+    # 调用llama模型
     response = ollama.generate(
-        model='llava:7b',
+        model='llama3.2-vision:11b',
         prompt=prompt,
         images=[base64_image],
         options={'temperature': 0.2}
@@ -42,14 +51,25 @@ def main():
     # 配置路径
     json_path = "problems.json"  # JSON文件路径
     test_dir = Path("test")      # 图片目录
-    output_file = "result.json"  # 输出文件
+    output_file = "result_llama.json"  # 输出文件
 
-    # 加载问题
+    # 加载问题和已有结果
     problems = load_problems(json_path)
-    results = []
+    try:
+        with open(output_file, 'r') as f:
+            existing_results = json.load(f)
+        processed_ids = {r['problem_id'] for r in existing_results}
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing_results = []
+        processed_ids = set()
+
+    results = existing_results.copy()
 
     # 遍历处理每个问题
     for problem_id, problem_data in problems.items():
+        if problem_id in processed_ids:
+            continue
+            
         if problem_data.get('image'):
             image_path = test_dir / problem_id / problem_data['image']
             
@@ -63,7 +83,7 @@ def main():
                 with open(output_file, 'w') as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
             else:
-                print(f"警告：图片缺失 {image_path}")
+                print(f"无图片： {image_path}")
 
     print(f"处理完成，结果已保存至 {output_file}")
 

@@ -19,12 +19,12 @@ def process_image_question(problem_id, problem_data, image_path):
     请根据图片内容和以下问题进行分析,你必须严格遵守我的[要求]。如果没有遵守[要求]，将会面临惩罚：
     [问题]：{problem_data['question']}
     [选项]：{" | ".join(problem_data['choices'])}
-    [要求]：给出选项索引（如0、1、2）。（选项索引是从 0 开始的）无论如何，请只给出选项索引，不要任何额外解释,不要加句号。你必须遵守我的要求，否则将会遭到惩罚。
+    [要求]：给出选项编号（如0、1、2）。无论如何，请只给出选项答案，不要任何额外解释。你必须遵守我的要求，否则将会遭到惩罚。
     """
 
-    # 调用llama模型
+    # 调用llava模型
     response = ollama.generate(
-        model='llama3.2-vision:11b',
+        model='llava:7b',
         prompt=prompt,
         images=[base64_image],
         options={'temperature': 0.2}
@@ -42,7 +42,7 @@ def main():
     # 配置路径
     json_path = "problems.json"  # JSON文件路径
     test_dir = Path("test")      # 图片目录
-    output_file = "result_llama.json"  # 输出文件
+    output_file = "result.json"  # 输出文件
 
     # 加载问题和已有结果
     problems = load_problems(json_path)
@@ -74,7 +74,7 @@ def main():
                 with open(output_file, 'w') as f:
                     json.dump(results, f, indent=2, ensure_ascii=False)
             else:
-                print(f"无图片： {image_path}")
+                print(f"警告：图片缺失 {image_path}")
 
     print(f"处理完成，结果已保存至 {output_file}")
 

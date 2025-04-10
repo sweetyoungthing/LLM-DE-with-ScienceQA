@@ -24,7 +24,7 @@ def process_image_question(problem_id, problem_data, image_path):
 
     # 调用llama模型
     response = ollama.generate(
-        model='llama3.2-vision:11b',
+        model='minicpm-v',
         prompt=prompt,
         images=[base64_image],
         options={'temperature': 0.2}
@@ -42,7 +42,7 @@ def main():
     # 配置路径
     json_path = "problems.json"  # JSON文件路径
     test_dir = Path("test")      # 图片目录
-    output_file = "result_llama.json"  # 输出文件
+    output_file = "result_minicpm-v.json"  # 输出文件
 
     # 加载问题和已有结果
     problems = load_problems(json_path)

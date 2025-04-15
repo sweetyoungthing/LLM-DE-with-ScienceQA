@@ -16,10 +16,10 @@ def process_image_question(problem_id, problem_data, image_path):
 
     # 构建多模态提示
     prompt = f"""
-    请根据图片内容和以下问题进行分析,你必须严格遵守我的[要求]。如果没有遵守[要求]，将会面临惩罚：
-    [问题]：{problem_data['question']}
-    [选项]：{" | ".join(problem_data['choices'])}
-    [要求]：给出选项索引（如0、1、2）。（选项索引是从 0 开始的）无论如何，请只给出选项索引，不要任何额外解释,不要加句号。你必须遵守我的要求，否则将会遭到惩罚。
+    Please analyze the image content and the following questions. You must strictly adhere to my [requirements]. If you do not comply with the [requirements], you will face punishment：
+    [question]：{problem_data['question']}
+    [choices]：{" | ".join(problem_data['choices'])}
+    [requirements]：Provide the option number (such as 0, 1, 2). No matter what, please only give the option answer, do not provide any additional explanation. You must comply with my request, or you will be punished.
     """
 
     # 调用llama模型
